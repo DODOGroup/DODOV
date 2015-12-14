@@ -11,9 +11,11 @@ namespace V
     class Program
     {
         static object o = new object();
+        static bool ver = false;
         static void Main(string[] args)
         {
             var start = new List<Tuple<string, Action<string[]>, string>>();
+            if (args.Contains(" /v ")) { ver = true; }
             start.Add(CreateTuple("/doump", (s) => Doump(s), "/doump Folder"));
             start.Add(CreateTuple("/read", (s) => ReadDoumpAndWriteEXT(s), ""));
             start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
@@ -27,7 +29,7 @@ namespace V
                 var v = start.Where((s) => s.Item1 == a).FirstOrDefault();
                 (v ?? CreateTuple("", (s) => { }, "")).Item2(args);
             });
-
+            Log("[Crime always win!]", true, ConsoleColor.Yellow);
         }
         static void Crime(string[] command)
         {
@@ -43,7 +45,7 @@ namespace V
                     }
                     catch (IndexOutOfRangeException)
                     {
-                        Log("Error in command options", ConsoleColor.Red);
+                        Log("Error in command options", ver, ConsoleColor.Red);
                     }
                     return;
                 }
@@ -59,7 +61,7 @@ namespace V
                 }
                 catch (Exception a)
                 {
-                    Log("Skipped " + item, ConsoleColor.Red);
+                    Log("Skipped " + item, ver, ConsoleColor.Red);
                 }
             });
             Directory.GetFiles(folder).AsParallel().ForAll((item) =>
@@ -74,13 +76,13 @@ namespace V
                 }
                 catch (Exception err)
                 {
-                    Log("Skipped " + item, ConsoleColor.Red);
+                    Log("Skipped " + item, ver, ConsoleColor.Red);
                 }
             });
-            Log("Crime has won", ConsoleColor.Yellow);
         }
-        static void Log(string s, ConsoleColor c = ConsoleColor.White)
+        static void Log(string s, bool verbose = false, ConsoleColor c = ConsoleColor.White)
         {
+            if (!verbose) { return; }
             lock (o)
             {
                 Console.ForegroundColor = c;
@@ -100,7 +102,7 @@ namespace V
                     }
                     catch (IndexOutOfRangeException)
                     {
-                        Log("Error in command options", ConsoleColor.Red);
+                        Log("Error in command options", ver, ConsoleColor.Red);
                     }
                     return;
                 }
@@ -122,7 +124,7 @@ namespace V
                     }
                     catch (IndexOutOfRangeException)
                     {
-                        Log("Error in command options", ConsoleColor.Red);
+                        Log("Error in command options", ver, ConsoleColor.Red);
                     }
                     return;
                 }
