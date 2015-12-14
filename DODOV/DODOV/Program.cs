@@ -15,7 +15,7 @@ namespace V
         static void Main(string[] args)
         {
             var start = new List<Tuple<string, Action<string[]>, string>>();
-            if (args.Contains(" /v ")) { ver = true; }
+            //if (args.ToList().ForEach((s)=>is_Command(s," /v ",))) { ver = true; }
             start.Add(CreateTuple("/doump", (s) => Doump(s), "/doump Folder"));
             start.Add(CreateTuple("/read", (s) => ReadDoumpAndWriteEXT(s), ""));
             start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
@@ -107,6 +107,11 @@ namespace V
                     return;
                 }
             }
+        }
+        static bool is_Command(string command, string iscontained,char[] rep) {
+            var v = false;
+            rep.ToList().ForEach((s) => { if (command.Contains(iscontained.Replace('/', s))) { v=true; } });
+            return v;
         }
         static void ReadDoumpAndWriteEXT(string[] command)
         {
