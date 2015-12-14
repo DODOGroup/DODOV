@@ -12,21 +12,22 @@ namespace V
     {
         static object o = new object();
         static bool ver = false;
+        static char[] separators = new char[] { '-','\\' };
         static void Main(string[] args)
         {
             var start = new List<Tuple<string, Action<string[]>, string>>();
-            //if (args.ToList().ForEach((s)=>is_Command(s," /v ",))) { ver = true; }
+            if (args.Any((s) => is_Command(s, "/v", separators))) { ver=true;}
             start.Add(CreateTuple("/doump", (s) => Doump(s), "/doump Folder"));
             start.Add(CreateTuple("/read", (s) => ReadDoumpAndWriteEXT(s), ""));
             start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
             start.Add(CreateTuple("/?", (s) =>
             {
-                start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3)));
+                start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3),true));
             }, ""));
             if (args.Length == 0) { start.Where((s) => s.Item1 == "/?").First().Item2(args); }
             args.ToList().ForEach((a) =>
             {
-                var v = start.Where((s) => s.Item1 == a).FirstOrDefault();
+                var v = start.Where((s) => is_Command(a,s.Item1,separators)).FirstOrDefault();
                 (v ?? CreateTuple("", (s) => { }, "")).Item2(args);
             });
             Log("[Crime always win!]", true, ConsoleColor.Yellow);
