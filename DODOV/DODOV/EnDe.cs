@@ -37,9 +37,6 @@ namespace FileSystemCreator {
             }
             return to_r;
         }
-        public bool Contains(string ext) {
-            return ls_E.Where((s) => s.Extension_string == ext).Count() != 0;
-        }
         public string[] GetExtensions() {
             return Enumerable.Range(0,ls_E.Count).Select((x)=>ls_E[x].Extension_string).ToArray();
         }
@@ -50,6 +47,9 @@ namespace FileSystemCreator {
                     return file.First().Sample_file;
                 }
             }
+        }
+        public bool Contains(string ext) {
+            return this.ls_E.Any((s) => s.Extension_string == ext);
         }
     }
     class Extension {

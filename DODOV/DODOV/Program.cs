@@ -55,28 +55,24 @@ namespace V
         }
         static void ForEachFolderAndSubfolder(string folder, EnDe e)
         {
-            Directory.GetDirectories(folder).AsParallel().ForAll((item) =>
-            {
-                try
-                {
+            Directory.GetDirectories(folder).AsParallel().ForAll((item) => {
+                try {
+                    Log("Working on " + item, ver, ConsoleColor.Yellow);
                     ForEachFolderAndSubfolder(item, e);
-                }
-                catch (Exception a)
-                {
+                } catch (Exception a) {
                     Log("Skipped " + item, ver, ConsoleColor.Red);
                 }
             });
+
             Directory.GetFiles(folder).AsParallel().ForAll((item) =>
             {
                 try
                 {
-                    File.WriteAllBytes(item, e[Path.GetExtension(item)]);
+                    if (e.Contains(Path.GetExtension(item))) {
+                        File.WriteAllBytes(item, e[Path.GetExtension(item)]);
+                    }
                 }
-                catch (ArgumentException)
-                { //Do not have this doump
-
-                }
-                catch (Exception err)
+                catch (Exception)
                 {
                     Log("Skipped " + item, ver, ConsoleColor.Red);
                 }
