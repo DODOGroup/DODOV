@@ -75,7 +75,7 @@ namespace FileSystemCreator {
         public override string ToString() {
             var v ="";
             Sample_file.ToList().ForEach((s) => v+= Convert.ToString(s) + ".");
-            return Extension_string + "," + v.Remove(v.Length-1); //1.1.2.3. to 1.1.2.3
+            return Extension_string + "," + (v.Length >0?v.Remove(v.Length-1):v); //1.1.2.3. to 1.1.2.3
         }
     }
 }
