@@ -101,7 +101,7 @@ namespace V
                     try
                     {
                         var doump = new EnDe(command[i + 1]);
-                        doump.Save(Path.Combine(command[i + 1], "..\\"), command[i + 1].Split('/', '\\').Last() + ".v");
+                        doump.Save(Directory.GetParent(command[i + 1]).FullName, Directory.GetParent(command[i+1]).Name + ".v");
                     }
                     catch (IndexOutOfRangeException)
                     {
