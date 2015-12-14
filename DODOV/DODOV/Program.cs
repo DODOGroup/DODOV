@@ -128,7 +128,7 @@ namespace V
                         var doump = EnDe.Parse(File.ReadAllLines(command[i + 1]));
                         foreach (var item in doump.GetExtensions())
                         {
-                            Log(item);
+                            Log(item,true);
                         }
                     }
                     catch (IndexOutOfRangeException)
