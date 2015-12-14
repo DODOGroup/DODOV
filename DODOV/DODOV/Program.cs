@@ -12,7 +12,7 @@ namespace V
     {
         static object o = new object();
         static bool ver = false;
-        static char[] separators = new char[] { '-','\\' };
+        static char[] separators = new char[] { '-','\\','/' };
         static void Main(string[] args)
         {
             var start = new List<Tuple<string, Action<string[]>, string>>();
@@ -22,21 +22,22 @@ namespace V
             start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
             start.Add(CreateTuple("/?", (s) =>
             {
-                start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3),true));
+                start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3),true,ConsoleColor.White));
             }, ""));
             if (args.Length == 0) { start.Where((s) => s.Item1 == "/?").First().Item2(args); }
             args.ToList().ForEach((a) =>
             {
                 var v = start.Where((s) => is_Command(a,s.Item1,separators)).FirstOrDefault();
                 (v ?? CreateTuple("", (s) => { }, "")).Item2(args);
-            });
+            });   
             Log("[Crime always win!]", true, ConsoleColor.Yellow);
+
         }
         static void Crime(string[] command)
         {
             for (int i = 0; i < command.Length; i++)
             {
-                if (command[i] == "/crime")
+                if (is_Command(command[i],"/crime",separators))
                 {
                     try
                     {
@@ -88,13 +89,14 @@ namespace V
             {
                 Console.ForegroundColor = c;
                 Console.WriteLine(s);
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
         static void Doump(string[] command)
         {
             for (int i = 0; i < command.Length; i++)
             {
-                if (command[i] == "/doump")
+                if (is_Command(command[i], "/doump", separators))
                 {
                     try
                     {
@@ -110,15 +112,16 @@ namespace V
             }
         }
         static bool is_Command(string command, string iscontained,char[] rep) {
-            var v = false;
-            rep.ToList().ForEach((s) => { if (command.Contains(iscontained.Replace('/', s))) { v=true; } });
-            return v;
+            return rep.ToList().Any((s) => command.Contains(iscontained.Replace('/', s)));
+            //var v = false;
+            //rep.ToList().ForEach((s) => { if (command.Contains(iscontained.Replace('/', s))) { v=true; } });
+            //return v;
         }
         static void ReadDoumpAndWriteEXT(string[] command)
         {
             for (int i = 0; i < command.Length; i++)
             {
-                if (command[i] == "/read")
+                if (is_Command(command[i], "/read", separators))
                 {
                     try
                     {
