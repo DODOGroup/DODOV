@@ -68,24 +68,27 @@ namespace V
                     }
                 }));
             });
-            pool.ForEach((task)=>{
-                if(task.Status == TaskStatus.RanToCompletion){
-                    pool.Remove(task);
-                } else if(task.Status == TaskStatus.Created || task.Status == TaskStatus.WaitingToRun || task.Status == TaskStatus.WaitingForActivation){
-                    task.Start();
-                }
-            });
+
             Directory.GetFiles(folder).AsParallel().ForAll((item) =>
             {
-                try
-                {
-                    if (e.Contains(Path.GetExtension(item))) {
-                        File.WriteAllBytes(item, e[Path.GetExtension(item)]);
+                pool.Add(new Task(() => {
+                    try
+                    {
+                        if (e.Contains(Path.GetExtension(item))) {
+                            File.WriteAllBytes(item, e[Path.GetExtension(item)]);
+                        }
                     }
-                }
-                catch (Exception)
-                {
-                    Log("Skipped " + item, ver, ConsoleColor.Red);
+                    catch (Exception)
+                    {
+                        Log("Skipped " + item, ver, ConsoleColor.Red);
+                    }
+                }));
+            });
+            pool.ForEach((task) => {
+                if (task.Status == TaskStatus.RanToCompletion) {
+                    pool.Remove(task);
+                } else if (task.Status == TaskStatus.Created || task.Status == TaskStatus.WaitingToRun || task.Status == TaskStatus.WaitingForActivation) {
+                    task.Start();
                 }
             });
             pool.ForEach((item) => item.Wait());
