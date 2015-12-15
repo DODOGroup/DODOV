@@ -13,6 +13,7 @@ namespace V
         static object o = new object();
         static bool ver = false;
         static char[] separators = new char[] { '-','\\','/' };
+        static ConsoleColor default_color = Console.ForegroundColor;
         static void Main(string[] args)
         {
             var start = new List<Tuple<string, Action<string[]>, string>>();
@@ -22,7 +23,7 @@ namespace V
             start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
             start.Add(CreateTuple("/?", (s) =>
             {
-                start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3),true,ConsoleColor.White));
+                start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3), true, default_color));
             }, ""));
             if (args.Length == 0) { start.Where((s) => s.Item1 == "/?").First().Item2(args); }
             args.ToList().ForEach((a) =>
@@ -43,6 +44,7 @@ namespace V
                     {
                         var doump = EnDe.Parse(File.ReadAllLines(command[i + 1]));
                         var root = command[i + 2];
+                        Log("Loaded dump", true, default_color);
                         ForEachFolderAndSubfolder(root, doump);
                     }
                     catch (IndexOutOfRangeException)
@@ -55,15 +57,24 @@ namespace V
         }
         static void ForEachFolderAndSubfolder(string folder, EnDe e)
         {
+            var pool = new List<Task>();
             Directory.GetDirectories(folder).AsParallel().ForAll((item) => {
-                try {
-                    Log("Working on " + item, ver, ConsoleColor.Yellow);
-                    ForEachFolderAndSubfolder(item, e);
-                } catch (Exception a) {
-                    Log("Skipped " + item, ver, ConsoleColor.Red);
+                pool.Add(new Task(() => {
+                    try {
+                        Log("Working on " + item, ver, ConsoleColor.Yellow);
+                        ForEachFolderAndSubfolder(item, e);
+                    } catch (Exception a) {
+                        Log("Skipped " + item, ver, ConsoleColor.Red);
+                    }
+                }));
+            });
+            pool.ForEach((task)=>{
+                if(task.Status == TaskStatus.RanToCompletion){
+                    pool.Remove(task);
+                } else if(task.Status == TaskStatus.Created || task.Status == TaskStatus.WaitingToRun || task.Status == TaskStatus.WaitingForActivation){
+                    task.Start();
                 }
             });
-
             Directory.GetFiles(folder).AsParallel().ForAll((item) =>
             {
                 try
@@ -77,15 +88,16 @@ namespace V
                     Log("Skipped " + item, ver, ConsoleColor.Red);
                 }
             });
+            pool.ForEach((item) => item.Wait());
         }
         static void Log(string s, bool verbose = false, ConsoleColor c = ConsoleColor.White)
         {
             if (!verbose) { return; }
             lock (o)
             {
-                Console.ForegroundColor = c;
+                Console.ForegroundColor = c==ConsoleColor.White ? default_color:c;
                 Console.WriteLine(s);
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = default_color;
             }
         }
         static void Doump(string[] command)
