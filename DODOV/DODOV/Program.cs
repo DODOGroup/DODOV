@@ -18,7 +18,7 @@ namespace V
         {
             var start = new List<Tuple<string, Action<string[]>, string>>();
             if (args.Any((s) => is_Command(s, "/v", separators))) { ver=true;}
-            start.Add(CreateTuple("/doump", (s) => Doump(s), "/doump Folder"));
+            start.Add(CreateTuple("/dump", (s) => Doump(s), "/dump Folder"));
             start.Add(CreateTuple("/read", (s) => ReadDoumpAndWriteEXT(s), ""));
             start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
             start.Add(CreateTuple("/?", (s) =>
@@ -107,11 +107,12 @@ namespace V
         {
             for (int i = 0; i < command.Length; i++)
             {
-                if (is_Command(command[i], "/doump", separators))
+                if (is_Command(command[i], "/dump", separators))
                 {
                     try
                     {
                         var doump = new EnDe(command[i + 1]);
+                        
                         doump.Save(Directory.GetParent(command[i + 1]).FullName, Directory.GetParent(command[i+1]).Name + ".v");
                     }
                     catch (IndexOutOfRangeException)

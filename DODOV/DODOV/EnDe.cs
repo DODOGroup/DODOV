@@ -7,7 +7,10 @@ using System.IO;
 
 namespace FileSystemCreator {
     class EnDe {
+        public EventHandler<string> SaveEvent { get; set; }
+
         List<Extension> ls_E = new List<Extension>();
+        
         public EnDe() { }
         public EnDe(string path) {
             Load(path);
@@ -24,7 +27,13 @@ namespace FileSystemCreator {
             string fullpath = Path.Combine(path, name);
             var to_save = new List<string>();
             Parallel.ForEach(ls_E,(s)=>{
+                if (SaveEvent != null) {
+                    SaveEvent(null, "Started serializing " +s.Extension_string);
+                }
                 to_save.Add(s.ToString());
+                if (SaveEvent != null) {
+                    SaveEvent(null, "Ended serializing " + s.Extension_string);
+                }
             });
             File.WriteAllLines(fullpath, to_save);
         }
