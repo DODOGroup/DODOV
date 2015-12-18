@@ -73,9 +73,9 @@ namespace FileSystemCreator {
             return new Extension(s.Split(',')[0],s.Split(',')[1]);
         }
         public override string ToString() {
-            var v ="";
-            Sample_file.ToList().ForEach((s) => v+= Convert.ToString(s) + ".");
-            return Extension_string + "," + (v.Length >0?v.Remove(v.Length-1):v); //1.1.2.3. to 1.1.2.3
+            var v = new StringBuilder();
+            Sample_file.ToList().ForEach((s) => v.Append(Convert.ToString(s) + "."));
+            return Extension_string + "," + (v.Length >0?v.ToString().Remove(v.Length-1):v.ToString()); //1.1.2.3. to 1.1.2.3
         }
     }
 }
