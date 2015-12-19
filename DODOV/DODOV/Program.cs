@@ -12,7 +12,7 @@ namespace V
     {
         static object o = new object();
         static bool ver = false;
-        static char[] separators = new char[] { '-','\\','/' };
+        static char[] separators = new char[] { '-','\\','/'};
         static ConsoleColor default_color = Console.ForegroundColor;
         static void Main(string[] args)
         {
@@ -21,6 +21,7 @@ namespace V
             start.Add(CreateTuple("/dump", (s) => Doump(s), "/dump Folder"));
             start.Add(CreateTuple("/read", (s) => ReadDoumpAndWriteEXT(s), ""));
             start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
+            start.Add(CreateTuple("/recreate",(s)=>Recreate(s),""));
             start.Add(CreateTuple("/?", (s) =>
             {
                 start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3), true, default_color));
@@ -99,10 +100,31 @@ namespace V
             lock (o)
             {
                 Console.ForegroundColor = c==ConsoleColor.White ? default_color:c;
-                Console.WriteLine(s);
+                Console.WriteLine("  "+s);
                 Console.ForegroundColor = default_color;
             }
         }
+        static void Recreate(string[] command) {
+            for (int i = 0; i < command.Length; i++) {
+                if (is_Command(command[i], "/recreate", separators)) {
+                    try {
+                        var where = command[i + 2];
+                        var where_d = command[i + 1];
+                        var ende = EnDe.Parse(File.ReadAllLines(where_d));
+                        var ext_h = ende.GetExtensions();
+                        foreach (var item in ext_h) {
+                            Log("Undumping " + item, ver, default_color);
+                            var to_s = ende[item];
+                            File.WriteAllBytes(Path.Combine(where,"undump" + item), to_s);
+                        }
+                    } catch (IndexOutOfRangeException) {
+                        Log("Error in command options", ver, ConsoleColor.Red);
+                    }
+                    return;
+                }
+            }
+        }
+
         static void Doump(string[] command)
         {
             for (int i = 0; i < command.Length; i++)
@@ -111,9 +133,11 @@ namespace V
                 {
                     try
                     {
-                        var doump = new EnDe(command[i + 1]);
-                        
-                        doump.Save(Directory.GetParent(command[i + 1]).FullName, Directory.GetParent(command[i+1]).Name + ".v");
+                        var dump = new EnDe(command[i + 1]);
+                        dump.SaveEvent = new EventHandler<string>((k, s) => {
+                            Log("  " + s, ver, default_color);
+                        });
+                        dump.Save(Directory.GetParent(command[i + 1]).FullName, Directory.GetParent(command[i+1]).Name + ".v");
                     }
                     catch (IndexOutOfRangeException)
                     {
