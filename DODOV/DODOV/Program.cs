@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using FileSystemCreator;
+using DODOV;
 
 namespace V
 {
@@ -26,7 +27,8 @@ namespace V
             {
                 start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3), true, default_color));
             }, ""));
-            if (args.Length == 0) { start.Where((s) => s.Item1 == "/?").First().Item2(args); }
+            start.Add(CreateTuple("/sub_c", (s) => CreateSubstitutionPattern(s), ""));
+            if (args.Length == 0) { start.Where((s) => s.Item1 == "/?").First().Item2(args); return; }
             args.ToList().ForEach((a) =>
             {
                 var v = start.Where((s) => is_Command(a,s.Item1,separators)).FirstOrDefault();
@@ -35,6 +37,7 @@ namespace V
             Log("[Crime always win!]", true, ConsoleColor.Yellow);
 
         }
+        #region ReplaceFile
         static void Crime(string[] command)
         {
             for (int i = 0; i < command.Length; i++)
@@ -43,6 +46,9 @@ namespace V
                 {
                     try
                     {
+                        if (!File.Exists(command[i + 1]) || !Directory.Exists(command[i + 2])) {
+                            Log("File or folder specified do not exsists", ver, ConsoleColor.Red);
+                        }
                         var doump = EnDe.Parse(File.ReadAllLines(command[i + 1]));
                         var root = command[i + 2];
                         Log("Loaded dump", true, default_color);
@@ -94,16 +100,6 @@ namespace V
             });
             pool.ForEach((item) => item.Wait());
         }
-        static void Log(string s, bool verbose = false, ConsoleColor c = ConsoleColor.White)
-        {
-            if (!verbose) { return; }
-            lock (o)
-            {
-                Console.ForegroundColor = c==ConsoleColor.White ? default_color:c;
-                Console.WriteLine("  "+s);
-                Console.ForegroundColor = default_color;
-            }
-        }
         static void Recreate(string[] command) {
             for (int i = 0; i < command.Length; i++) {
                 if (is_Command(command[i], "/recreate", separators)) {
@@ -124,7 +120,6 @@ namespace V
                 }
             }
         }
-
         static void Doump(string[] command)
         {
             for (int i = 0; i < command.Length; i++)
@@ -175,7 +170,53 @@ namespace V
                 }
             }
         }
+        #endregion
+        #region SubstituteWhatsInside
+        static void CreateSubstitutionPattern(string[] command) {
+            var c = false;
+            var list = new SubstitutorFromXML();
+            var save_here = "";
+            for (int i = 0; i < command.Length; i++) {
+                if (is_Command(command[i], "/sub_c", separators)) {
+                    save_here = command[i + 1];
+                }
+            }
+            do {
+                var to_r = new SubstitutionSegment();
+                Log("Write regex pattern>", true, default_color,false);
+                to_r.Regex_pattern = Console.ReadLine();
+                Log("Write substitution pattern>", true, default_color,false);
+                to_r.Substitute_with = Console.ReadLine();
+                Log("Write ext this is wort for, ';' separed>",true,default_color,false);
+                to_r.Extension = Console.ReadLine();
+                if (to_r.Extension.Split(';').Length == 0) {
+                    list.Add(to_r);
+                } else {
+                    var exte = to_r.Extension.Split(';');
+                    foreach (var item in exte) {
+                        to_r.Extension = item;
+                        list.Add(to_r);
+                    }
+                }
+                Log("Want to continue [y/N]>",true,default_color,false);
+                c = Console.ReadLine().ToUpper() == "Y" ? true : false;
+            } while (c);
+            list.Save(save_here);
+        }
+        #endregion
 
+        static void Log(string s, bool verbose = false, ConsoleColor c = ConsoleColor.White,bool new_line=true)
+        {
+            if (!verbose) { return; }
+            lock (o)
+            {
+                Console.ForegroundColor = c==ConsoleColor.White ? default_color:c;
+                if (new_line) { Console.WriteLine("  " + s); } else {
+                    Console.Write("   " + s);
+                }
+                Console.ForegroundColor = default_color;
+            }
+        }
         static Tuple<string, Action<string[]>, string> CreateTuple(string s, Action<string[]> a, string doc)
         {
             return Tuple.Create(s, a, doc);

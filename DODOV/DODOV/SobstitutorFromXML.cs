@@ -21,6 +21,9 @@ namespace DODOV {
             inners.Clear();
             inners.AddRange(deserialized);
         }
+        public void Add(SubstitutionSegment s) {
+            inners.Add(s);
+        }
         public bool Contains(string ext) {
             return inners.Any((s) => s.Extension == ext);
         }
@@ -44,7 +47,7 @@ namespace DODOV {
             })).ToArray();
         }
     }
-    class SubstitutionSegment {
+    public class SubstitutionSegment {
         public string Extension{get;set;}
         public string Regex_pattern { get; set; }
         public string Substitute_with { get; set; }
