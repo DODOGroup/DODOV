@@ -20,9 +20,9 @@ namespace V
             var start = new List<Tuple<string, Action<string[]>, string>>();
             if (args.Any((s) => is_Command(s, "/v", separators))) { ver=true;}
             start.Add(CreateTuple("/dump", (s) => Doump(s), "/dump Folder"));
-            start.Add(CreateTuple("/read", (s) => ReadDoumpAndWriteEXT(s), ""));
-            start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (doump path)"));
-            start.Add(CreateTuple("/recreate",(s)=>Recreate(s),""));
+            start.Add(CreateTuple("/read", (s) => ReadDoumpAndWriteEXT(s), "/read dump_path"));
+            start.Add(CreateTuple("/crime", (s) => Crime(s), "Crime has no explanation (/crime dump_path from_path)"));
+            start.Add(CreateTuple("/recreate",(s)=>Recreate(s),"/recreate dump_path undump"));
             start.Add(CreateTuple("/?", (s) =>
             {
                 start.ForEach((s1) => Log(string.Format("{0} > {1}", s1.Item1, s1.Item3), true, default_color));
@@ -70,7 +70,7 @@ namespace V
                     try {
                         Log("Working on " + item, ver, ConsoleColor.Yellow);
                         ForEachFolderAndSubfolder(item, e);
-                    } catch (Exception a) {
+                    } catch (Exception) {
                         Log("Skipped " + item, ver, ConsoleColor.Red);
                     }
                 }));
